@@ -36,6 +36,7 @@ func FormatStatus(data []byte) (string, error) {
 	json.Unmarshal(data, &stats)
 	forwarderStats := stats["forwarderStats"]
 	runnerStats := stats["runnerStats"]
+	pyLoaderStats := stats["pyLoaderStats"]
 	autoConfigStats := stats["autoConfigStats"]
 	aggregatorStats := stats["aggregatorStats"]
 	jmxStats := stats["JMXStatus"]
@@ -44,7 +45,7 @@ func FormatStatus(data []byte) (string, error) {
 	title := fmt.Sprintf("Agent (v%s)", stats["version"])
 	stats["title"] = title
 	renderHeader(b, stats)
-	renderChecksStats(b, runnerStats, autoConfigStats, "")
+	renderChecksStats(b, runnerStats, pyLoaderStats, autoConfigStats, "")
 	renderJMXFetchStatus(b, jmxStats)
 	renderForwarderStatus(b, forwarderStats)
 	renderLogsStatus(b, logsStats)
@@ -68,7 +69,7 @@ func FormatDCAStatus(data []byte) (string, error) {
 	title := fmt.Sprintf("Datadog Cluster Agent (v%s)", stats["version"])
 	stats["title"] = title
 	renderHeader(b, stats)
-	renderChecksStats(b, runnerStats, autoConfigStats, "")
+	renderChecksStats(b, runnerStats, nil, autoConfigStats, "")
 	renderForwarderStatus(b, forwarderStats)
 
 	return b.String(), nil
@@ -120,9 +121,10 @@ func renderDatadogClusterAgentStatus(w io.Writer, dcaStats interface{}) {
 	}
 }
 
-func renderChecksStats(w io.Writer, runnerStats interface{}, autoConfigStats interface{}, onlyCheck string) {
+func renderChecksStats(w io.Writer, runnerStats, pyLoaderStats, autoConfigStats interface{}, onlyCheck string) {
 	checkStats := make(map[string]interface{})
 	checkStats["RunnerStats"] = runnerStats
+	checkStats["pyLoaderStats"] = pyLoaderStats
 	checkStats["AutoConfigStats"] = autoConfigStats
 	checkStats["OnlyCheck"] = onlyCheck
 	t := template.Must(template.New("collector.tmpl").Funcs(fmap).ParseFiles(filepath.Join(templateFolder, "collector.tmpl")))
@@ -139,8 +141,9 @@ func renderCheckStats(data []byte, checkName string) (string, error) {
 	stats := make(map[string]interface{})
 	json.Unmarshal(data, &stats)
 	runnerStats := stats["runnerStats"]
+	pyLoaderStats := stats["pyLoaderStats"]
 	autoConfigStats := stats["autoConfigStats"]
-	renderChecksStats(b, runnerStats, autoConfigStats, checkName)
+	renderChecksStats(b, runnerStats, pyLoaderStats, autoConfigStats, checkName)
 
 	return b.String(), nil
 }
