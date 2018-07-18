@@ -42,5 +42,27 @@
     Number of leader transitions: {{.leaderelection.transitions}}
     {{- end}}
     {{- end}}
+
+  Horizontal Pod Autoscaling Status
+  =================================
+    {{- if .hpaExternal }}
+    {{- if .hpaExternal.Error }}
+    Error while trying to serve external metrics: {{ .hpaExternal.Error }}
+    {{ else }}
+    {{- if .hpaExternal.ErrorStore }}
+        Internal Error while processing the External Metrics : {{ .hpaExternal.ErrorStore }}
+    {{ else }}
+    External Metrics Provider
+    =========================
+    ConfigMap name: {{ .hpaExternal.cmname }}
+    Number of external metrics detected: {{ .hpaExternal.number }}
+
+    {{- end }}
+    {{- end }}
+    {{ else }}
+    The External Metrics Provider is not enabled
+    {{- end }}
+
+
 {{/* this line intentionally left blank */}}
 

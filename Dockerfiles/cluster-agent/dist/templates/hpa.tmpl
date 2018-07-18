@@ -1,0 +1,34 @@
+  Horizontal Pod Autoscaling Status
+  =================================
+    {{- if .hpaExternal }}
+    {{- if .hpaExternal.Error }}
+    Error while trying to serve external metrics: {{ .hpaExternal.Error }}
+    {{ else }}
+    {{- if .hpaExternal.ErrorStore }}
+        Internal Error while processing the External Metrics : {{ .hpaExternal.ErrorStore }}
+    {{ else }}
+
+    External Metrics Provider
+    =========================
+
+    ConfigMap name: {{ .hpaExternal.cmname }}
+    Number of external metrics detected: {{ .hpaExternal.number }}
+
+    {{- end }}
+    {{- end }}
+    {{- range $name, $val := .hpaExternal.metrics }}
+    {{- range $n, $v := $val}}
+    {{- if or (eq $n "hpa") (eq $n "labels")}}
+    {{$n}}:
+    {{- range $i, $j := $v}}
+    - {{$i}}: {{$j}}
+    {{- end -}}
+    {{else}}
+    {{$n}}: {{$v}}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+    {{ else }}
+    The External Metrics Provider is not enabled
+    {{- end -}}
+
